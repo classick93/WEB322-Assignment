@@ -6,11 +6,12 @@
  *
  * Student Name  : Jason Shin
  * Student ID    : 111569216
- * Date: Feb 3, 2023
+ * Date:         : Feb 3, 2023
  * Course/Section: WEB322/NGG
  * Online (Cyclic) URL: https://blue-different-spider.cyclic.app/
  *
  **************************************************************************************/
+
 const file = require("fs"); // required at the top of your module
 var posts = []; // posts declared as array globally 
 var categories = []; // categories declared as array globally
