@@ -52,7 +52,7 @@ app.get("/blog", (req, res) => {
   blogService
     .getPublishedPosts()
     .then((data) => {
-      console.log("getPublishedPosts.json");
+      console.log("getPublishedPosts");
       res.json(data);
     })
     .catch((err) => {
@@ -65,7 +65,7 @@ app.get("/categories", (req, res) => {
   blogService
     .getCategories()
     .then((data) => {
-      console.log("getCategories.json");
+      console.log("getCategories");
       res.json(data);
     })
     .catch((err) => {
@@ -78,14 +78,16 @@ app.get("/posts", (req, res) => {
   let query_prom = null;
   if (req.query.category) {
     query = blogService.getPostsByCategory(req.query.category);
+    console.log("getPostsbyCategory");
   } else if (req.query.minDate) {
     query = blogService.getPostsByMinDate(req.query.minDate);
+    console.log("getPostsByMinDate");
   } else {
     query = blogService.getAllPosts();
+    console.log("getAllPosts");
   }
-  query_prom
+  query
     .then((data) => {
-      console.log("Getting posts query");
       res.json(data);
     })
     .catch((err) => {
