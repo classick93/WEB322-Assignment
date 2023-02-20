@@ -75,7 +75,7 @@ app.get("/categories", (req, res) => {
 });
 //assignment 3-main begin//
 app.get("/posts", (req, res) => {
-  let query_prom = null;
+  let query= null;
   if (req.query.category) {
     query = blogService.getPostsByCategory(req.query.category);
     console.log("getPostsbyCategory");

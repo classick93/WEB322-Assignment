@@ -88,9 +88,9 @@ module.exports.addPost = function (postData) {
 
 module.exports.getPostsByCategory = function (category) {
   return new Promise((res, rej) => {
-    let category_filter = posts.filter((post) => post.category == category);
+    let category_filter = posts.filter((p) => p.category == category);
     if (category_filter.length == 0) {
-      reject("No results returned");
+      rej("No results returned");
     } else {
       res(category_filter);
     }
@@ -100,10 +100,10 @@ module.exports.getPostsByCategory = function (category) {
 module.exports.getPostsByMinDate = function (minDateStr) {
   return new Promise((res, re) => {
     let date_filter = posts.filter(
-      (post) => new Date(post.postDate) >= new Date(minDateStr)
+      (p) => new Date(p.postDate) >= new Date(minDateStr)
     );
     if (date_filter.length == 0) {
-      reject("No results returned");
+      rej("No results returned");
     } else {
       res(date_filter);
     }
@@ -112,7 +112,7 @@ module.exports.getPostsByMinDate = function (minDateStr) {
 
 module.exports.getPostById = function (id) {
   return new Promise((res, rej) => {
-    let post_found = posts.find((post) => post.id == id);
+    let post_found = posts.find((p) => p.id == id);
     if (post_found) {
       res(post_found);
     } else {
