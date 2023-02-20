@@ -77,11 +77,11 @@ app.get("/categories", (req, res) => {
 app.get("/posts", (req, res) => {
   let query_prom = null;
   if (req.query.category) {
-    query_prom = blogService.getPostsByCategory(req.query.category);
+    query = blogService.getPostsByCategory(req.query.category);
   } else if (req.query.minDate) {
-    query_prom = blogService.getPostsByMinDate(req.query.minDate);
+    query = blogService.getPostsByMinDate(req.query.minDate);
   } else {
-    query_prom = blogService.getAllPosts();
+    query = blogService.getAllPosts();
   }
   query_prom
     .then((data) => {
