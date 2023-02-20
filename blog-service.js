@@ -13,10 +13,10 @@
  **************************************************************************************/
 
 const file = require("fs"); // required at the top of your module
-var posts = []; // posts declared as array globally
-var categories = []; // categories declared as array globally
+var posts = [];
+var categories = [];
 
-module.exports.initialize = () => {
+module.exports.initialize = function () {
   return new Promise((res, rej) => {
     file.readFile("./data/posts.json", "utf8", (err, data) => {
       if (err) {
@@ -26,30 +26,29 @@ module.exports.initialize = () => {
         posts = JSON.parse(data);
       }
     });
-
     file.readFile("./data/categories.json", "utf8", (err, data) => {
       if (err) {
         rej(err);
         console.log("Unable to read file" + err);
       } else {
         categories = JSON.parse(data);
+        res();
       }
     });
-    res();
   });
 };
 
-module.exports.getAllPosts = () => {
+module.exports.getAllPosts = function () {
   return new Promise((res, rej) => {
     if (posts.length === 0) {
-      rej("no results returned");
+      rej("No results returned");
     } else {
       res(posts);
     }
   });
 };
 
-module.exports.getPublishedPosts = () => {
+module.exports.getPublishedPosts = function () {
   var publishedPosts = [];
   return new Promise((res, rej) => {
     for (var i = 0; i < posts.length; i++) {
@@ -57,25 +56,24 @@ module.exports.getPublishedPosts = () => {
         publishedPosts.push(posts[i]);
       }
     }
-
     if (publishedPosts.length === 0) {
-      rej("no results returned");
+      rej("No results returned");
     }
     res(publishedPosts);
   });
 };
 
-module.exports.getCategories = () => {
+module.exports.getCategories = function () {
   return new Promise((res, rej) => {
     if (categories.length == 0) {
-      rej("no results returned");
+      rej("No results returned");
     } else {
       res(categories);
     }
   });
 };
 
-module.exports.addPost = (postData) => {
+module.exports.addPost = function (postData) {
   return new Promise((res, rej) => {
     if (postData.published == undefined) {
       postData.published = false;
@@ -88,51 +86,37 @@ module.exports.addPost = (postData) => {
   });
 };
 
-module.exports.getPostsByCategory = (category) => {
+module.exports.getPostsByCategory = function (category) {
   return new Promise((res, rej) => {
-    var sort_category = [];
-    for (var j = 0; j < posts.length; j++) {
-      if (posts[j].category == category) {
-        sort_category.push(posts[j]);
-      }
-    }
-    if (sort_category == 0) {
-      rej("no results returned");
+    let category_filter = posts.filter((post) => post.category == category);
+    if (category_filter.length == 0) {
+      reject("No results returned");
     } else {
-      res(sort_category);
+      res(category_filter);
     }
   });
 };
 
-module.exports.getPostsByMinDate = (minDateStr) => {
-  return new Promise(function (res, rej) {
-    var posts_date = [];
-    for (var k = 0; k < posts.length; k++) {
-      if (new Date(posts[k].postDate) >= new Date(minDateStr)) {
-        console.log("The postDate value is greater than minDateStr");
-        posts_date.push(posts[k]);
-      }
-    }
-    if (posts_date.length == 0) {
-      rej("no results returned");
+module.exports.getPostsByMinDate = function (minDateStr) {
+  return new Promise((res, re) => {
+    let date_filter = posts.filter(
+      (post) => new Date(post.postDate) >= new Date(minDateStr)
+    );
+    if (date_filter.length == 0) {
+      reject("No results returned");
     } else {
-      res(posts_date);
+      res(date_filter);
     }
   });
 };
 
-module.exports.getPostById = (id) => {
+module.exports.getPostById = function (id) {
   return new Promise((res, rej) => {
-    var posts_id = [];
-    for (var n = 0; n < posts.length; n++) {
-      if (posts[n].id == id) {
-        posts_id.push[posts[n]];
-      }
-    }
-    if (posts_id.length == 0) {
-      rej("no results returned");
+    let post_found = posts.find((post) => post.id == id);
+    if (post_found) {
+      res(post_found);
     } else {
-      res(posts_id);
+      rej("No result returned");
     }
   });
 };

@@ -34,6 +34,8 @@ cloudinary.config({
 //Finally, create an "upload" variable without any disk storage, ie:
 const upload = multer(); // no { storage: storage } since we are not using disk storage
 
+app.use(express.static("public"));
+
 function onHttpStart() {
   console.log("Express http server listening on: " + HTTP_PORT);
 }
@@ -72,52 +74,25 @@ app.get("/categories", (req, res) => {
     });
 });
 
-//Assignment 3///
 app.get("/posts", (req, res) => {
+  let query_prom = null;
   if (req.query.category) {
-    blogService
-      .getPostByCategory(req.query.category)
-      .then((data) => {
-        res.json(data);
-      })
-      .catch((err) => {
-        res.json({ message: err });
-      });
-  } else if (req.query.minDateStr) {
-    blogService
-      .getPostsByMinDate(req.query.minDateStr)
-      .then((data) => {
-        res.json(data);
-      })
-      .catch((err) => {
-        res.json({ message: err });
-      });
+    query_prom = blogService.getPostsByCategory(req.query.category);
+  } else if (req.query.minDate) {
+    query_prom = blogService.getPostsByMinDate(req.query.minDate);
   } else {
-    blogService
-      .getAllPosts()
-      .then((data) => {
-        console.log("getAllPosts.json.");
-        res.json(data);
-      })
-      .catch((err) => {
-        console.log("Unable to open the file: " + err);
-        res.json({ message: err });
-      });
+    query_prom = blogService.getAllPosts();
   }
-});
-/* // Assignment 2 previous /posts //
-app.get("/posts", (req, res) => {
-  blogService
-    .getAllPosts()
+  query_prom
     .then((data) => {
-      console.log("getAllPosts.json");
+      console.log("Getting posts query");
       res.json(data);
     })
     .catch((err) => {
-      console.log("Unable to open the file: " + err);
+      console.log("Error has occurred" + err);
       res.json({ message: err });
     });
-}); */
+});
 
 app.get("/posts/add", (req, res) => {
   res.sendFile(path.join(__dirname, "/views/addPost.html"));
@@ -165,7 +140,6 @@ app.post("/posts/add", upload.single("featureImage"), (req, res) => {
       });
   });
 });
-/////Assignment 3 - part 2 - step 2 end ///////
 
 app.use((req, res) => {
   res.status(404).send("Page Not Found");
