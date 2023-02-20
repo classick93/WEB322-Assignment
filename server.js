@@ -18,12 +18,12 @@ var app = express();
 const path = require("path");
 const blogService = require("./blog-service.js");
 
-//Inside your server.js file "require" the libraries:
+//Inside your server.js file "require" the libraries: (assignment 3)
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const streamifier = require("streamifier");
 
-//Set the cloudinary config to use your "Cloud Name", "API Key" and "API Secret" values, ie:
+//Set the cloudinary config (assignment 3)
 cloudinary.config({
   cloud_name: "dlzmn4koa",
   api_key: "726729223185397",
@@ -31,7 +31,7 @@ cloudinary.config({
   secure: true,
 });
 
-//Finally, create an "upload" variable without any disk storage, ie:
+//Finally, create an "upload" variable without any disk storage, ie: (assignment 3)
 const upload = multer(); // no { storage: storage } since we are not using disk storage
 
 app.use(express.static("public"));
@@ -73,7 +73,7 @@ app.get("/categories", (req, res) => {
       res.json({ message: err });
     });
 });
-
+//assignment 3-main begin//
 app.get("/posts", (req, res) => {
   let query_prom = null;
   if (req.query.category) {
@@ -140,6 +140,7 @@ app.post("/posts/add", upload.single("featureImage"), (req, res) => {
       });
   });
 });
+//assignment 3-end//
 
 app.use((req, res) => {
   res.status(404).send("Page Not Found");
