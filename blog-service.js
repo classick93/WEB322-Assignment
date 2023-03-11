@@ -1,17 +1,16 @@
 /*************************************************************************************
- * WEB322 - Assignment 3
+ * WEB322 - Assignment 4
  * I declare that this assignment is my own work in accordance with the Seneca Academic
  * Policy. No part of this assignment has been copied manually or electronically from
  * any other source (including web sites) or distributed to other students.
  *
  * Student Name  : Jason Shin
  * Student ID    : 111569216
- * Date:         : Feb 19, 2023
+ * Date:         : Mar 10, 2023
  * Course/Section: WEB322/NGG
  * Online (Cyclic) URL: https://blue-different-spider.cyclic.app/
  *
  **************************************************************************************/
-
 const file = require("fs"); // required at the top of your module
 var posts = [];
 var categories = [];
@@ -73,7 +72,7 @@ module.exports.getCategories = function () {
   });
 };
 
-module.exports.addPost = function (postData) {
+module.exports.addPost = function (postData) { //assignment 4
   return new Promise((res, rej) => {
     if (postData.published == undefined) {
       postData.published = false;
@@ -81,6 +80,12 @@ module.exports.addPost = function (postData) {
       postData.published = true;
     }
     postData.id = posts.length + 1;
+    let today = new Date();
+    let dd = String(today.getDate()).padStart(2, "0");
+    let mm = String(today.getMonth() + 1).padStart(2, "0");
+    let yyyy = today.getFullYear();
+    today = yyyy + "-" + mm + "-" + dd;
+    postData.postDate = today;
     posts.push(postData);
     res(postData);
   });
@@ -97,8 +102,19 @@ module.exports.getPostsByCategory = function (category) {
   });
 };
 
+module.exports.getPublishedPostsByCategory = function (category) { // assignment 4
+  return new Promise((res, rej) => {
+    let category_filter = posts.filter(
+      (post) => post.published && post.category == category
+    );
+    category_filter.length > 0
+      ? res(category_filter)
+      : rej("No results returned");
+  });
+};
+
 module.exports.getPostsByMinDate = function (minDateStr) {
-  return new Promise((res, re) => {
+  return new Promise((res, rej) => {
     let date_filter = posts.filter(
       (p) => new Date(p.postDate) >= new Date(minDateStr)
     );
