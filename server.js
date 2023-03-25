@@ -1,12 +1,12 @@
 /*************************************************************************************
- * WEB322 - Assignment 4
+ * WEB322 - Assignment 5
  * I declare that this assignment is my own work in accordance with the Seneca Academic
  * Policy. No part of this assignment has been copied manually or electronically from
  * any other source (including web sites) or distributed to other students.
  *
  * Student Name  : Jason Shin
  * Student ID    : 111569216
- * Date          : Mar 10, 2023
+ * Date          : Mar 24, 2023
  * Course/Section: WEB322/NGG
  * Online (Cyclic) URL: https://blue-different-spider.cyclic.app/
  *
@@ -16,15 +16,15 @@ const express = require("express");
 const app = express();
 const path = require("path");
 const blogService = require("./blog-service.js");
-const exphbs = require("express-handlebars"); // assignment 4
-const stripJs = require("strip-js"); // assignment 4
+const exphbs = require("express-handlebars");
+const stripJs = require("strip-js");
 
-//Inside your server.js file "require" the libraries: 
+//Inside your server.js file "require" the libraries:
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const streamifier = require("streamifier");
 
-//Set the cloudinary config 
+//Set Cloudinary config
 cloudinary.config({
   cloud_name: "dlzmn4koa",
   api_key: "726729223185397",
@@ -34,9 +34,9 @@ cloudinary.config({
 
 const upload = multer();
 
-app.engine( // assignment 4
+app.engine(
   ".hbs",
-  exphbs.engine({ 
+  exphbs.engine({
     extname: ".hbs",
     helpers: {
       navLink: function (url, options) {
@@ -62,20 +62,33 @@ app.engine( // assignment 4
       safeHTML: function (context) {
         return stripJs(context);
       },
+      formatDate: function (dateObj) {
+        let year = dateObj.getFullYear();
+        let month = (dateObj.getMonth() + 1).toString();
+        let day = dateObj.getDate().toString();
+        return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+      },
     },
   })
 );
+
 app.set("view engine", ".hbs");
 
 //function onHttpStart() {
 //  console.log("Express http server listening on: " + HTTP_PORT);
 //}
+
 app.use(express.static("public"));
 
-app.use(function (req, res, next) { // assignment 4
+app.use(express.urlencoded({ extended: true }));
+
+app.use(function (req, res, next) {
   let route = req.path.substring(1);
   app.locals.activeRoute =
-    route == "/" ? "/" : "/" + route.replace(/\/(.*)/, "");
+    "/" +
+    (isNaN(route.split("/")[1])
+      ? route.replace(/\/(?!.*)/, "")
+      : route.replace(/\/(.*)/, ""));
   app.locals.viewingCategory = req.query.category;
   next();
 });
@@ -88,7 +101,8 @@ app.get("/about", (req, res) => {
   res.render("about");
 });
 
-app.get("/blog", async (req, res) => { // assignment 4
+app.get("/blog", async (req, res) => {
+  // assignment 4
   // Declare an object to store properties for the view
   let viewData = {};
   try {
@@ -129,11 +143,28 @@ app.get("/categories", (req, res) => {
     .getCategories()
     .then((data) => {
       console.log("getCategories");
-      res.render("categories", { categories: data }); // assignment 4
+      data.length > 0
+        ? res.render("categories", { categories: data })
+        : res.render("categories", { message: "no results" });
     })
     .catch((err) => {
       console.log("Unable to open the file: " + err);
-      res.render("categories", { message: "no results" }); // assignment 4
+      res.render("categories", { message: "no results" });
+    });
+});
+
+app.get("/categories/add", (req, res) => {
+  res.render("addCategory");
+});
+
+app.post("/categories/add", (req, res) => {
+  blogService
+    .addCategory(req.body)
+    .then((category) => {
+      res.redirect("/categories");
+    })
+    .catch((err) => {
+      res.status(500).send(err.message);
     });
 });
 
@@ -151,16 +182,25 @@ app.get("/posts", (req, res) => {
   }
   query
     .then((data) => {
-      res.render("posts", { posts: data }); // assignment 4
+      data.length > 0
+        ? res.render("posts", { posts: data })
+        : res.render("posts", { message: "no results" });
     })
     .catch((err) => {
       console.log("Error has occurred" + err);
-      res.render("posts", { message: "no results" }); // assignment 4
+      res.render("posts", { message: "no results" });
     });
 });
 
 app.get("/posts/add", (req, res) => {
-  res.render("addPost"); // assignment 4
+  blogService
+    .getCategories()
+    .then((data) => {
+      res.render("addPost", { categories: data });
+    })
+    .catch((err) => {
+      res.render("addPost", { categories: [] });
+    });
 });
 
 app.get("/posts/:id", (req, res) => {
@@ -171,6 +211,28 @@ app.get("/posts/:id", (req, res) => {
     })
     .catch((err) => {
       res.json({ message: err });
+    });
+});
+
+app.get("/posts/delete/:id", (req, res) => {
+  blogService
+    .deletePostById(req.params.id)
+    .then(() => {
+      res.redirect("/posts");
+    })
+    .catch((err) => {
+      res.status(500).send("Unable to Remove Post / Post Not Found");
+    });
+});
+
+app.get("/categories/delete/:id", (req, res) => {
+  blogService
+    .deleteCategoryById(req.params.id)
+    .then(() => {
+      res.redirect("/categories");
+    })
+    .catch((err) => {
+      res.status(500).send("Unable to Remove Category / Category Not Found");
     });
 });
 
@@ -208,7 +270,8 @@ app.post("/posts/add", upload.single("featureImage"), (req, res) => {
   }
 });
 
-app.get("/blog/:id", async (req, res) => { //assignment 4
+app.get("/blog/:id", async (req, res) => {
+  //assignment 4
   // Declare an object to store properties for the view
   let viewData = {};
   try {
@@ -255,11 +318,11 @@ app.use((req, res) => {
 blogService
   .initialize()
   .then(() => {
-    console.log("Initialized then!");
+    console.log("blogService initialized then!");
     app.listen(HTTP_PORT, () => {
       console.log("server listening on: " + HTTP_PORT);
     });
   })
   .catch((err) => {
-    console.log("Initialize error has occurred:" + err);
+    console.log("blogService initialize error has occurred:" + err);
   });
